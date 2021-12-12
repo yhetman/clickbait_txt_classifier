@@ -1,7 +1,6 @@
 from nltk import word_tokenize
 import re
 from nltk.sentiment.vader import SentimentIntensityAnalyzer
-import textstat
 import numpy as np
 import multiprocessing
 import pandas as pd
@@ -14,7 +13,7 @@ import string
 from sklearn.preprocessing import Normalizer, StandardScaler, RobustScaler, MinMaxScaler, MaxAbsScaler
 from pymagnitude import *
 from nltk.corpus import stopwords 
-
+import textstat
 
 
 
@@ -169,6 +168,7 @@ def calc_readability_scores(df):
     rows = [result_dict[idx] for idx in range(df.title.values.shape[0])]
     return pd.DataFrame(rows).values
 
+
 def text_features(df):
     longest_word_length = []
     mean_word_length = []
@@ -184,6 +184,7 @@ def text_features(df):
     length_in_chars =  np.array(length_in_chars).reshape(-1,1)
     
     return np.concatenate([longest_word_length, mean_word_length, length_in_chars], axis = 1)
+
 
 def count_punctuations(df):
     puncts = []
@@ -265,6 +266,7 @@ def word_ratio(df):
 
     return np.concatenate([easy_words_ratio, stop_words_ratio, contractions_ratio, hyperbolic_ratio, clickbait_subs_ratio, non_clickbait_subs_ratio], axis = 1)
 
+
 def num_hashtags(df):
     return np.array([title.count('#') for title in df.title.values]).reshape(-1,1)
 
@@ -289,11 +291,13 @@ def calc_sentiment_scores(df):
     compound = np.array(compound).reshape(-1,1)
     return np.concatenate([neg,  pos, compound], axis = 1)
 
+
 def get_glove_vectors(df, glove):
     vectors = []
     for title in tqdm_notebook(df.title.values):
         vectors.append(np.average(glove.query(word_tokenize(title)), axis = 0))
     return np.array(vectors)
+
 
 
 def tfidf_w2v(df, idf_dict, glove):
@@ -308,8 +312,6 @@ def tfidf_w2v(df, idf_dict, glove):
 def featurize(train_df, test_df, embedding_type):
 
     print('Starts with number....')
-    
-    
     train_starts_with_number = starts_with_number(train_df)
     test_starts_with_number = starts_with_number(test_df)
     
@@ -347,11 +349,12 @@ def featurize(train_df, test_df, embedding_type):
     train_sentiment = calc_sentiment_scores(train_df)
     test_sentiment = calc_sentiment_scores(test_df)
 
+    
     print('Readability Scores....')
-
     train_readability_scores = calc_readability_scores(train_df)
     test_readability_scores = calc_readability_scores(test_df)
 
+    
     if embedding_type == 'tfidf':
         print('TFIDF Title....')
 
